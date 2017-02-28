@@ -1,102 +1,64 @@
-#**Finding Lane Lines on the Road** 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+# Finding Lane Lines on the Road
 
-<img src="laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
+This project is part of the [Self-Driving Car Engineer Nanodegree](https://www.udacity.com/course/self-driving-car-engineer-nanodegree--nd013)
 
-Overview
----
+Code is available in [P1 Notebook](P1.ipynb)
 
-When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
+## Reflection
 
-In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
+## 1\. The Pipeline
 
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
+I attempted to produce a minimum viable product first. This pipeline was implemented quickly based on the material from the course and I was able to detect lanes in the test images without any problem. I had to play with the pipeline parameters a bit but this was straightforward.
 
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
+In the process, the function draw_lines() was modified to do the following:
 
+1. Segment lines into left and right based on slope
+2. Find the mean line that represented the left lines and right lines
+3. Find slope and y-intercept of the mean line (`linsolve([m * x_1 + b - y_1, m * x_2 + b - y_2], m, b)`)
+4. Extrapolated the mean lines for better visualization based on (`x = (y - b)/m`)
 
-Creating a Great Writeup
----
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
-1. Describe the pipeline
-2. Identify any shortcomings
-3. Suggest possible improvements
+I was then able to apply the lane detection pipeline to the videos as required in the project. At this point, I implemented history based smoothing of lane markers and I was quite happy with the results.
 
-We encourage using images in your writeup to demonstrate how your pipeline works.  
+After completing the basic requirements, I started working on the challenge and found that my pipeline is failing in certain places. I did the following to come up with a better solution.
 
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
+1. Explored OpenCV documentation for ideas
+2. Built classes to represent images, lines, lane-detection, image-processing, etc.
+3. Built an interactive UI for tuning the pipeline parameters
+4. Experimented with different edge detection techniques (sobel, laplacian, etc.)
+5. Experimented with histogram equalization (equalizeHist, CLAHE, etc.)
+6. Decided to add a hue/saturation/brightness range filter
+7. Darkened the grayscale image enough to highlight the color mask yet allow detection of prominent features
+8. Added a debug flag to troubleshoot things
+9. Did just enough tuning to satisfy the challenge
 
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
+Here is a diagram that describes my improved pipeline.
 
+![Pipeline](pipeline.png)
 
-The Project
----
+At this point I was happy with the pipeline in the context of the challenge. The following are some images that describes the performance of the pipeline.
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you can install the starter kit or follow the install instructions below to get started on this project. ##
+![](out/extra.mp4-3.5.jpg-processed.jpg)
 
-**Step 1:** Getting setup with Python
+![](out/extra.mp4-4.5.jpg-processed.jpg)
 
-To do this project, you will need Python 3 along with the numpy, matplotlib, and OpenCV libraries, as well as Jupyter Notebook installed. 
+![](out/solidWhiteRight.jpg-processed.jpg)
 
-We recommend downloading and installing the Anaconda Python 3 distribution from Continuum Analytics because it comes prepackaged with many of the Python dependencies you will need for this and future projects, makes it easy to install OpenCV, and includes Jupyter Notebook.  Beyond that, it is one of the most common Python distributions used in data analytics and machine learning, so a great choice if you're getting started in the field.
+## 2\. Potential Shortcomings
 
-Choose the appropriate Python 3 Anaconda install package for your operating system <A HREF="https://www.continuum.io/downloads" target="_blank">here</A>.   Download and install the package.
+When the lanes cannot be detected on the road, the current implementation will depend on the lane history. This is not acceptable for production use. I feel that the pipeline should produce some sort of confidence metrics to indicate this.
 
-If you already have Anaconda for Python 2 installed, you can create a separate environment for Python 3 and all the appropriate dependencies with the following command:
+Another possibility for failure is the changes in ambient light. The pipeline will not be very happy with a darker image of the road ahead. I played with histogram equalization to address this but this needs more tuning and I left that for later.
 
-`>  conda create --name=yourNewEnvironment python=3 anaconda`
+Although this pipeline seems to perform well on the test images provided (and some of my own videos), I feel that it isn't a representative sample of what it might encounter in the wild world out there, which makes it dangerous to use in production.
 
-`>  source activate yourNewEnvironment`
+In general, I feel that a lane detector must publish its confidence level continuously so that other parts of the vehicle can choose to depend on it or not (assuming there is redundancy and other kinds of sensors to depend on or that it can come to a safe stop or switch to manual drive).
 
-**Step 2:** Installing OpenCV
+## 3\. Possible Improvements
 
-Once you have Anaconda installed, first double check you are in your Python 3 environment:
+An essential improvement is to maintain a confidence value and return this to the caller. The confidence must keep reducing if lanes cannot be detected in the incoming frames. I feel very important for the safety of the passengers or the cargo.
 
-`>python`    
-`Python 3.5.2 |Anaconda 4.1.1 (x86_64)| (default, Jul  2 2016, 17:52:12)`  
-`[GCC 4.2.1 Compatible Apple LLVM 4.2 (clang-425.0.28)] on darwin`  
-`Type "help", "copyright", "credits" or "license" for more information.`  
-`>>>`   
-(Ctrl-d to exit Python)
+I feel that associating a probability with individual lane lines is a good idea. This must be possible with statistical techniques or with the help of a machine learning model. Also, labeling other lanes that the pipeline might detect based on its position/visual appearance, etc. is a good idea to make things more robust.
 
-run the following commands at the terminal prompt to get OpenCV:
+In the current form, a possible improvement to the pipeline would be to tune it more with a wider spectrum of test images. This can be implemented in different ways. One option is to manually "label" a corpus of input images and use grid search on the lane-detection parameters to find optimal values. The error can be estimated as a mean square error of the pixels, for example. Another option is to make it a game and crowd-source tuning parameters!
 
-`> pip install pillow`  
-`> conda install -c menpo opencv3=3.1.0`
-
-then to test if OpenCV is installed correctly:
-
-`> python`  
-`>>> import cv2`  
-`>>>`  (i.e. did not get an ImportError)
-
-(Ctrl-d to exit Python)
-
-**Step 3:** Installing moviepy  
-
-We recommend the "moviepy" package for processing video in this project (though you're welcome to use other packages if you prefer).  
-
-To install moviepy run:
-
-`>pip install moviepy`  
-
-and check that the install worked:
-
-`>python`  
-`>>>import moviepy`  
-`>>>`  (i.e. did not get an ImportError)
-
-(Ctrl-d to exit Python)
-
-**Step 4:** Opening the code in a Jupyter Notebook
-
-You will complete this project in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out <A HREF="https://www.packtpub.com/books/content/basics-jupyter-notebook-and-python" target="_blank">Cyrille Rossant's Basics of Jupyter Notebook and Python</A> to get started.
-
-Jupyter is an ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, run the following command at the terminal prompt (be sure you're in your Python 3 environment!):
-
-`> jupyter notebook`
-
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
-
-**Step 5:** Complete the project and submit both the Ipython notebook and the project writeup
-
+Another incremental improvement is to make use of the area between the lanes to estimate the missing lane or to check the correctness of the detected lanes. Transforming the image to "top view" will enable more creative exploration of the frame. I will stop here for now because that seems to be one of the things coming up in the syllabus!

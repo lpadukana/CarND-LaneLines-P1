@@ -1,5 +1,9 @@
 # Finding Lane Lines on the Road
 
+This project is part of the [Self-Driving Car Engineer Nanodegree](https://www.udacity.com/course/self-driving-car-engineer-nanodegree--nd013)
+
+Code is available in [P1 Notebook](P1.ipynb)
+
 ## Reflection
 
 ## 1\. The Pipeline
@@ -41,11 +45,11 @@ At this point I was happy with the pipeline in the context of the challenge. The
 
 ## 2\. Potential Shortcomings
 
-One potential failure mode would be when the lanes are no longer marked on the road. Current implementation will depend on the lane history when lanes cannot be detected from the incoming frames. This is not acceptable for production use and the pipeline should also produce some sort of confidence metrics.
+When the lanes cannot be detected on the road, the current implementation will depend on the lane history. This is not acceptable for production use. I feel that the pipeline should produce some sort of confidence metrics to indicate this.
 
-Another failure mode is the changes in the ambient light. I feel the pipeline will not be very happy with a darker image of the road ahead. I played with histogram equalization to address this but this needs more tuning and I left that for later.
+Another possibility for failure is the changes in ambient light. The pipeline will not be very happy with a darker image of the road ahead. I played with histogram equalization to address this but this needs more tuning and I left that for later.
 
-Although this pipeline seems to perform well on the test images provided (and some of my own images), I feel that it isn't a representative sample of what it might encounter in the wild wild world out there, which makes it dangerous to use in production.
+Although this pipeline seems to perform well on the test images provided (and some of my own videos), I feel that it isn't a representative sample of what it might encounter in the wild world out there, which makes it dangerous to use in production.
 
 In general, I feel that a lane detector must publish its confidence level continuously so that other parts of the vehicle can choose to depend on it or not (assuming there is redundancy and other kinds of sensors to depend on or that it can come to a safe stop or switch to manual drive).
 
@@ -53,8 +57,8 @@ In general, I feel that a lane detector must publish its confidence level contin
 
 An essential improvement is to maintain a confidence value and return this to the caller. The confidence must keep reducing if lanes cannot be detected in the incoming frames. I feel very important for the safety of the passengers or the cargo.
 
-I feel we should also attempt to associate a probability with individual lane lines that the pipeline detects. This must be possible with statistical techniques or with the help of a machine learning model. I feel we should also be able to label other lanes that the pipeline might detect based on its position/visual appearance, etc. to make things more robust.
+I feel that associating a probability with individual lane lines is a good idea. This must be possible with statistical techniques or with the help of a machine learning model. Also, labeling other lanes that the pipeline might detect based on its position/visual appearance, etc. is a good idea to make things more robust.
 
 In the current form, a possible improvement to the pipeline would be to tune it more with a wider spectrum of test images. This can be implemented in different ways. One option is to manually "label" a corpus of input images and use grid search on the lane-detection parameters to find optimal values. The error can be estimated as a mean square error of the pixels, for example. Another option is to make it a game and crowd-source tuning parameters!
 
-Another incremental improvement is to make use of the area between the lanes to estimate the missing lane or to check the correctness of the detected lanes. I feel transforming the image to "top view" will enable more creative exploration of the frame. I will stop here for now because that seems to be one of the things coming up in the syllabus!
+Another incremental improvement is to make use of the area between the lanes to estimate the missing lane or to check the correctness of the detected lanes. Transforming the image to "top view" will enable more creative exploration of the frame. I will stop here for now because that seems to be one of the things coming up in the syllabus!
