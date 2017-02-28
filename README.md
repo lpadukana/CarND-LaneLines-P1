@@ -6,7 +6,7 @@ This project is part of the [Self-Driving Car Engineer Nanodegree](https://www.u
 
 Code is available in [P1 Notebook](P1.ipynb)
 
-![Combined Image](laneLines_thirdPass.jpg)
+![Combined Image](out/extra.mp4-3.5.jpg-processed.jpg)
 
 ## Reflection
 
@@ -61,7 +61,7 @@ Although a fair bit of confidence can be obtained from image processing based la
 
 ### 3\. Possible Improvements
 
-An essential improvement is to maintain a confidence value and return this to the caller. The confidence must keep reducing if lanes cannot be detected in the incoming frames. I feel very important for the safety of the passengers or the cargo.
+An essential improvement is to maintain a confidence value and return this to the caller. The confidence must keep reducing if lanes cannot be detected in the incoming frames. I feel this is very important for the safety of the passengers or the cargo.
 
 I feel that associating a probability with individual lane lines is a good idea. This must be possible with statistical techniques or with the help of a machine learning model. Also, labeling other lanes that the pipeline might detect based on its position/visual appearance, etc. is a good idea to make things more robust.
 
